@@ -1,0 +1,32 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f9;
+}
+
+#chat-container {
+    width: 100%;
+    max-width: 500px;
+    border: 1px solid #ccc;
+    border-radius: 15px;
+    background-color: #fff;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.message {
+    padding: 10px;
+    margin: 10px;
+    border-radius: 8px;
+}
+
+.user {
+    background-color: #dcf8c6;
+}
+
+.chatgpt {
+    background-color: #f1f0f0;
+}
+
+button {
+    background-color: #5b86e5;
+    color: white;
+}

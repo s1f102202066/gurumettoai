@@ -1,0 +1,65 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Gurumetto AI</title>
+</head>
+<body>
+    <h1>飲食店おすすめアプリ</h1>
+    <div id="chat-box">
+        <div class="message chatgpt">あなたがお探しの飲食店の条件を教えてください。</div>
+    </div>
+    <form id="chat-form" method="post">
+        {% csrf_token %}
+        <input type="text" id="message" placeholder="メッセージを入力">
+        <button type="submit">送信</button>
+    </form>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const chatForm = document.getElementById('chat-form');
+            const chatBox = document.getElementById('chat-box');
+
+            chatForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const userMessage = document.getElementById('message').value;
+                if (userMessage.trim() === '') return;
+
+                // Display user message in chat box
+                const userMessageDiv = document.createElement('div');
+                userMessageDiv.classList.add('message', 'user');
+                userMessageDiv.textContent = `You: ${userMessage}`;
+                chatBox.appendChild(userMessageDiv);
+
+                // Clear the input field
+                document.getElementById('message').value = '';
+
+                try {
+                    const response = await fetch('/chat/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: new URLSearchParams({ message: userMessage })
+                    });
+
+                    const result = await response.json();
+                    const chatgptResponse = result.response;
+
+                    // Display ChatGPT response in chat box
+                    const chatgptMessageDiv = document.createElement('div');
+                    chatgptMessageDiv.classList.add('message', 'chatgpt');
+                    chatgptMessageDiv.innerHTML = chatgptResponse.replace(/\n/g, '<br>');
+                    chatBox.appendChild(chatgptMessageDiv);
+
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                } catch (error) {
+                    console.error('Error:', error);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
