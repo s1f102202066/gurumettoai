@@ -43,4 +43,40 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('Error:', error);
         }
     });
+
+    function displaySuggestion() {
+        fetch('/suggest-restaurant-with-reviews/') // 上記のビューにリクエストを送信
+            .then(response => response.json())
+            .then(data => {
+                const chatBox = document.getElementById('chatBox'); // チャットエリア
+                if (data.error) {
+                    chatBox.innerHTML += `<p>${data.error}</p>`;
+                } else {
+                    const restaurant = data.suggested_restaurant;
+                    const details = data.details;
+    
+                    chatBox.innerHTML += `
+                        <div>
+                            <h3>おすすめ: ${restaurant}</h3>
+                            <p>評価: ${details.rating || "情報なし"}</p>
+                            <h4>口コミ:</h4>
+                            <ul>
+                                ${details.reviews
+                                    ? details.reviews
+                                          .map(
+                                              review =>
+                                                  `<li>${review.author_name}: ${review.text} (評価: ${review.rating})</li>`
+                                          )
+                                          .join('')
+                                    : '<li>口コミ情報がありません。</li>'}
+                            </ul>
+                        </div>
+                    `;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    }
+    
 });

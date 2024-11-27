@@ -91,3 +91,52 @@ def chat(request):
 
     return JsonResponse({'response': "無効なリクエストです。"})
 
+def fetch_reviews(restaurant_name):
+    """
+    Google Places APIを使って、指定された飲食店の口コミを取得する
+    """
+    api_key = os.getenv('GOOGLE_MAPS_API_KEY')
+
+    # 場所の検索エンドポイント
+    search_url = "https://maps.googleapis.com/maps/api/place/findplacefromtext/json"
+    search_params = {
+        'input': restaurant_name,
+        'inputtype': 'textquery',
+        'fields': 'place_id',
+        'key': api_key
+    }
+    search_response = requests.get(search_url, params=search_params)
+    search_data = search_response.json()
+
+    if 'candidates' in search_data and len(search_data['candidates']) > 0:
+        place_id = search_data['candidates'][0]['place_id']
+    else:
+        return {"error": f"No details found for {restaurant_name}"}
+
+    # 場所の詳細エンドポイント
+    details_url = "https://maps.googleapis.com/maps/api/place/details/json"
+    details_params = {
+        'place_id': place_id,
+        'fields': 'name,rating,reviews',
+        'key': api_key
+    }
+    details_response = requests.get(details_url, params=details_params)
+    details_data = details_response.json()
+
+    return details_data.get('result', {})
+
+def suggest_restaurant_with_reviews(request):
+    """
+    AIが提案した飲食店情報に基づいて口コミを取得し、返す
+    """
+    # 例: AIが提案する飲食店名 (ここは後でAIから生成されるように接続)
+    suggested_restaurant = "スターバックス"
+    restaurant_details = fetch_reviews(suggested_restaurant)
+
+    if "error" in restaurant_details:
+        return JsonResponse({"error": restaurant_details["error"]}, status=404)
+
+    return JsonResponse({
+        "suggested_restaurant": suggested_restaurant,
+        "details": restaurant_details
+    })
