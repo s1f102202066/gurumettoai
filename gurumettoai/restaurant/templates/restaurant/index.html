@@ -10,7 +10,7 @@
 <body>
     <div id="chat-container">
         <div id="chat-box">
-            <div class="message chatgpt">あなたがお探しの飲食店の条件を教えてください。</div>
+            <div class="message chatgpt">あなたがお探しの飲食店の条件を教えてください。{{ chatgpt_response|safe }}</div>
         </div>
         <form id="chat-form" method="post">
             {% csrf_token %}
