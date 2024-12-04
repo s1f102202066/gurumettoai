@@ -49,14 +49,35 @@ def get_restaurant_recommendations(query, genre=None):
 GENRE_CODES = {
     "ラーメン": "G013",
     "居酒屋": "G001",
-    "カフェ": "G014",
-    # 必要に応じてジャンルを追加
+    "カフェ・スイーツ": "G014",
+    "ダイニングバー・バル":"G002",
+    "創作料理":"G003",
+    "和食":"G004",
+    "洋食":"G005",
+    "イタリアン・フレンチ":"G006",
+    "中華":"G007",
+    "焼肉・ホルモン":"G008",
+    "韓国料理":"G017",
+    "アジア・エスニック料理":"G009",
+    "各国料理":"G010",
+    "カラオケ・パーティ":"G011",
+    "バー・カクテル":"G012",
+    "お好み焼き・もんじゃ":"G016",
+    "その他グルメ":"G015"
+
 }
 
 @csrf_exempt
 def chat(request):
     if request.method == 'POST':
         user_message = request.POST.get('message', '').strip()
+
+        # 飲食に関連するキーワードが含まれているかをチェック
+        keywords = list(GENRE_CODES.keys())
+        is_related_to_food = any(keyword in user_message for keyword in keywords)
+
+        if not is_related_to_food:
+            return JsonResponse({'response': "お探しの飲食店の条件を入力してください。"})
 
         # ユーザーのメッセージからジャンルを特定
         selected_genre = None
@@ -90,5 +111,3 @@ def chat(request):
         return JsonResponse({'response': chatgpt_response})
 
     return JsonResponse({'response': "無効なリクエストです。"})
-
-
