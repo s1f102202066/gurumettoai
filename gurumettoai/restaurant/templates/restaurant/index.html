@@ -18,6 +18,52 @@
             <button type="submit">送信</button>
         </form>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const chatForm = document.getElementById('chat-form');
+            const chatBox = document.getElementById('chat-box');
+
+            chatForm.addEventListener('submit', async function (e) {
+                e.preventDefault();
+                const userMessage = document.getElementById('message').value.trim();
+                if (!userMessage) return;
+
+                // ユーザーのメッセージを表示
+                const userMessageDiv = document.createElement('div');
+                userMessageDiv.classList.add('message', 'user');
+                userMessageDiv.textContent = userMessage;
+                chatBox.appendChild(userMessageDiv);
+
+                document.getElementById('message').value = '';
+
+                // AIの応答を取得
+                try {
+                    const response = await fetch('/chat/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: new URLSearchParams({
+                            message: userMessage
+                        })
+                    });
+
+                    const result = await response.json();
+                    const aiMessage = result.response;
+
+                    const aiMessageDiv = document.createElement('div');
+                    aiMessageDiv.classList.add('message', 'chatgpt');
+                    aiMessageDiv.textContent = aiMessage;
+                    chatBox.appendChild(aiMessageDiv);
+
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                } catch (error) {
+                    console.error('Error:', error);
+                }
+            });
+        });
+    </script>
     
 </body>
 </html>
