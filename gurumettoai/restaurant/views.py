@@ -101,6 +101,6 @@ def chat(request):
             recommendation_text = "赤羽エリアで該当する店舗が見つかりませんでした。ほかのジャンルもお試しください！"
 
         # 飲食店情報のみを返す
-        return JsonResponse({'response': recommendation_text})
+        return JsonResponse({'response': '条件にあった店舗はこちらになります'+recommendation_text})
 
     return JsonResponse({'response': "無効なリクエストです。"})
