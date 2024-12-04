@@ -56,7 +56,7 @@ GENRE_CODES = {
     "洋食":"G005",
     "イタリアン・フレンチ":"G006",
     "中華":"G007",
-    "焼肉・ホルモン":"G008",
+    "焼肉":"G008",
     "韓国料理":"G017",
     "アジア・エスニック料理":"G009",
     "各国料理":"G010",
@@ -86,28 +86,21 @@ def chat(request):
                 selected_genre = genre_code
                 break
 
-        # OpenAIの応答を生成
-        response = openai.ChatCompletion.create(
-            model="gpt-4o-mini",
-            messages=[
-                {"role": "system", "content": "あなたは日本語で応答する飲食店アシスタントです。どんな入力でも日本語で返答し、赤羽にあるレストランの情報を提供してください。"},
-                {"role": "user", "content": user_message}
-            ],
-            max_tokens=1000
-        )
-
-        chatgpt_response = response['choices'][0]['message']['content'].strip()
-
-        # レストランの推薦を追加（赤羽固定、ジャンルがあれば適用）
+        # レストランの推薦を取得（赤羽固定、ジャンルがあれば適用）
         recommendations = get_restaurant_recommendations(user_message, genre=selected_genre)
         if recommendations:
             recommendation_text = ""
             for rec in recommendations:
-                recommendation_text += f"- 店名: {rec['name']} 住所: {rec['address']} 詳細: {rec['url']} {rec['image_url']}  {rec['name']} "
-            chatgpt_response += "赤羽エリアのおすすめ飲食店:" + recommendation_text.strip()
+                recommendation_text += (
+                    f"- 店名: {rec['name']} | "
+                    f"住所: {rec['address']} | "
+                    f"詳細: {rec['url']} | "
+                    f"画像: {rec['image_url']}\n"
+                )
         else:
-            chatgpt_response += "赤羽エリアで該当する店舗が見つかりませんでした。ほかのジャンルもお試しください！"
+            recommendation_text = "赤羽エリアで該当する店舗が見つかりませんでした。ほかのジャンルもお試しください！"
 
-        return JsonResponse({'response': chatgpt_response})
+        # 飲食店情報のみを返す
+        return JsonResponse({'response': recommendation_text})
 
     return JsonResponse({'response': "無効なリクエストです。"})
