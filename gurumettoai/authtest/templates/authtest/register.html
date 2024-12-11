@@ -1,0 +1,15 @@
+<html lang="ja">
+<head>
+    <meta charset="utf-8">
+    <title>Register</title>
+</head>
+<body>
+    <h1>Register</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Register</button>
+    </form>
+    <p><a href="{% url 'login' %}">既にアカウントをお持ちですか？ログインはこちら</a></p>
+</body>
+</html>
