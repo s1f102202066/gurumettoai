@@ -1,1 +1,1 @@
-web: gunicorn gurumettoai.wsgi --log-file -
+web: gunicorn gurumettoai.wsgi

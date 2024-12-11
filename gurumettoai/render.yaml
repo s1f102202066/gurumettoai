@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: gurumettoai
+    env: python
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "gunicorn projectname.wsgi"
+    envVars:
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: HOTPEPPER_API_KEY
+        sync: false
