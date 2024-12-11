@@ -6,8 +6,30 @@
     <meta charset="UTF-8">
     <title>Gurumetto AI</title>
     <link rel="stylesheet" href="{% static 'styles.css' %}">
+    <style>
+        /* シンプルなデザインのボタン用スタイル */
+        #login-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #007BFF;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        #login-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
 </head>
 <body>
+    <!-- ログインボタン -->
+    <a href="/app01/" id="login-button">ログイン</a>
+
     <div id="chat-container">
         <div id="chat-box">
             <div class="message chatgpt">あなたがお探しの飲食店の条件を教えてください。{{ chatgpt_response|safe }}</div>
@@ -64,6 +86,5 @@
             });
         });
     </script>
-    
 </body>
 </html>
