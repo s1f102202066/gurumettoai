@@ -1,47 +1,43 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const chatForm = document.getElementById('chat-form');
     const chatBox = document.getElementById('chat-box');
-    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-    
-    console.log("CSRF Token:", csrftoken); // CSRFトークンをコンソールに出力して確認
 
-    chatForm.addEventListener('submit', async function(e) {
+    chatForm.addEventListener('submit', async function (e) {
         e.preventDefault();
-        const userMessage = document.getElementById('message').value;
-        if (userMessage.trim() === '') return;
+        const userMessage = document.getElementById('message').value.trim();
+        if (!userMessage) return;
 
-        // Display user message in chat box
+        // ユーザーのメッセージを表示
         const userMessageDiv = document.createElement('div');
         userMessageDiv.classList.add('message', 'user');
-        userMessageDiv.textContent = `You: ${userMessage}`;
+        userMessageDiv.textContent = userMessage; // ユーザーのメッセージをそのまま表示
         chatBox.appendChild(userMessageDiv);
 
-        // Clear the input field
         document.getElementById('message').value = '';
 
+        // AIの応答を取得
         try {
             const response = await fetch('/chat/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
-                    'X-CSRFToken': csrftoken
                 },
-                body: new URLSearchParams({ message: userMessage })
+                body: new URLSearchParams({
+                    message: userMessage
+                })
             });
 
             const result = await response.json();
-            const chatgptResponse = result.response;
+            const aiMessage = result.response;
 
-            // Display ChatGPT response in chat box
-            const chatgptMessageDiv = document.createElement('div');
-            chatgptMessageDiv.classList.add('message', 'chatgpt');
-            chatgptMessageDiv.innerHTML = chatgptResponse.replace(/\n/g, '<br>');
-            chatBox.appendChild(chatgptMessageDiv);
+            const aiMessageDiv = document.createElement('div');
+            aiMessageDiv.classList.add('message', 'chatgpt');
+            aiMessageDiv.innerHTML = aiMessage; // HTMLを直接レンダリング
+            chatBox.appendChild(aiMessageDiv);
 
-            chatBox.scrollTop = chatBox.scrollHeight;
+            chatBox.scrollTop = chatBox.scrollHeight; // スクロールを最下部に
         } catch (error) {
             console.error('Error:', error);
         }
     });
-
-})
+});

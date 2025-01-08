@@ -17,3 +17,5 @@ db.sqlite3
 # OS Files
 .DS_Store
 Thumbs.db
+
+.venv/
