@@ -1,6 +1,5 @@
 from django.shortcuts import render
 from django.http import JsonResponse
-from .models import Restaurant
 import openai
 import requests
 import os
@@ -15,8 +14,11 @@ def home(request):
     return render(request, 'restaurant/index.html')
 
 # HotPepper APIを使ったレストラン情報取得
-def get_restaurant_recommendations(query, genre=None):
+def get_restaurant_recommendations(genre=None):
     api_key = os.getenv('HOTPEPPER_API_KEY')
+    if api_key is None:
+        return {'response': 'APIキーが設定されていません。'}
+
     url = 'http://webservice.recruit.co.jp/hotpepper/gourmet/v1/'
     params = {
         'key': api_key,
@@ -30,8 +32,9 @@ def get_restaurant_recommendations(query, genre=None):
     if genre:
         params['genre'] = genre
 
-    response = requests.get(url, params=params)
-    if response.status_code == 200:
+    try:
+        response = requests.get(url, params=params)
+        response.raise_for_status()
         results = response.json().get('results', {}).get('shop', [])
         recommendations = []
         for shop in results:
@@ -42,29 +45,28 @@ def get_restaurant_recommendations(query, genre=None):
                 'image_url': shop.get('photo', {}).get('pc', {}).get('l')
             })
         return recommendations
-    else:
-        return []
+    except requests.exceptions.RequestException as e:
+        return {'response': f"APIアクセス中にエラーが発生しました: {str(e)}"}
 
 # ジャンルコードの辞書
 GENRE_CODES = {
     "ラーメン": "G013",
     "居酒屋": "G001",
     "カフェ・スイーツ": "G014",
-    "ダイニングバー・バル":"G002",
-    "創作料理":"G003",
-    "和食":"G004",
-    "洋食":"G005",
-    "イタリアン・フレンチ":"G006",
-    "中華":"G007",
-    "焼肉":"G008",
-    "韓国料理":"G017",
-    "アジア・エスニック料理":"G009",
-    "各国料理":"G010",
-    "カラオケ・パーティ":"G011",
-    "バー・カクテル":"G012",
-    "お好み焼き・もんじゃ":"G016",
-    "その他グルメ":"G015"
-
+    "ダイニングバー・バル": "G002",
+    "創作料理": "G003",
+    "和食": "G004",
+    "洋食": "G005",
+    "イタリアン・フレンチ": "G006",
+    "中華": "G007",
+    "焼肉": "G008",
+    "韓国料理": "G017",
+    "アジア・エスニック料理": "G009",
+    "各国料理": "G010",
+    "カラオケ・パーティ": "G011",
+    "バー・カクテル": "G012",
+    "お好み焼き・もんじゃ": "G016",
+    "その他グルメ": "G015"
 }
 
 @csrf_exempt
@@ -72,35 +74,44 @@ def chat(request):
     if request.method == 'POST':
         user_message = request.POST.get('message', '').strip()
 
-        # 飲食に関連するキーワードが含まれているかをチェック
-        keywords = list(GENRE_CODES.keys())
-        is_related_to_food = any(keyword in user_message for keyword in keywords)
+        # ChatGPTで条件を解析
+        response = openai.ChatCompletion.create(
+            model="gpt-4o-mini",
+            messages=[
+                {
+                    "role": "system",
+                    "content": "あなたは日本語で応答する飲食店アシスタントです。ユーザーの入力から、必要な情報（ジャンル）を抽出し、それを基に赤羽のレストランを探すのに必要なデータを返してください。",
+                },
+                {"role": "user", "content": user_message}
+            ],
+            max_tokens=1000,
+        )
 
-        if not is_related_to_food:
-            return JsonResponse({'response': "お探しの飲食店の条件を入力してください。"})
+        # ChatGPTの応答からジャンルを抽出
+        parsed_response = response['choices'][0]['message']['content'].strip()
+        genre = None
 
-        # ユーザーのメッセージからジャンルを特定
-        selected_genre = None
-        for genre, genre_code in GENRE_CODES.items():
-            if genre in user_message:
-                selected_genre = genre_code
-                break
+        # ChatGPT応答からジャンルを簡易解析（例: ジャンル: ラーメン）
+        if "ジャンル" in parsed_response:
+            genre_text = parsed_response.split("ジャンル:")[1].split(",")[0].strip()
+            genre = GENRE_CODES.get(genre_text)
 
-        # レストランの推薦を取得（赤羽固定、ジャンルがあれば適用）
-        recommendations = get_restaurant_recommendations(user_message, genre=selected_genre)
+        # 飲食店情報をHotPepper APIから取得
+        recommendations = get_restaurant_recommendations(genre=genre)
         if recommendations:
-            recommendation_text = ""
+            if isinstance(recommendations, dict):  # エラー時は辞書を返す
+                return JsonResponse(recommendations)
+
+            recommendation_text = "お探しの条件に合った飲食店はこちらです:\n"
             for rec in recommendations:
                 recommendation_text += (
-                    f"- 店名: {rec['name']} | "
+                    f"- <a href='{rec['url']}' target='_blank'>{rec['name']}</a> | "
                     f"住所: {rec['address']} | "
-                    f"詳細: {rec['url']} | "
-                    f"画像: {rec['image_url']}\n"
+                    f"<img src='{rec['image_url']}' alt='{rec['name']}' style='max-height:100px;' />\n"
                 )
         else:
-            recommendation_text = "赤羽エリアで該当する店舗が見つかりませんでした。ほかのジャンルもお試しください！"
+            recommendation_text = "赤羽エリアで該当する店舗が見つかりませんでした。ほかの条件でもお試しください！"
 
-        # 飲食店情報のみを返す
-        return JsonResponse({'response': '条件にあった店舗はこちらになります'+recommendation_text})
+        return JsonResponse({'response': recommendation_text})
 
     return JsonResponse({'response': "無効なリクエストです。"})
