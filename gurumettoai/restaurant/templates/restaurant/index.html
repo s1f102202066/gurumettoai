@@ -166,7 +166,7 @@ button:hover {
 
                     const aiMessageDiv = document.createElement('div');
                     aiMessageDiv.classList.add('message', 'chatgpt');
-                    aiMessageDiv.textContent = aiMessage;
+                    aiMessageDiv.innerHTML = aiMessage;
                     chatBox.appendChild(aiMessageDiv);
 
                     chatBox.scrollTop = chatBox.scrollHeight;
