@@ -4,6 +4,6 @@ from . import views
 urlpatterns = [
     path('', views.home, name='home'),
     path('chat/', views.chat, name='chat'),  # チャットエンドポイント
-    path('review/<str:shop_id>/', views.review, name='review'),  # お店の詳細ページ
+    path('review/<str:place_id>/', views.review, name='review'),
 
 ]

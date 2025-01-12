@@ -110,6 +110,12 @@
             margin: 0 0 10px 0;
         }
 
+        .shop-card p {
+            margin: 5px 0;
+            color: #555;
+            font-size: 14px;
+        }
+
         .shop-card a {
             color: #007BFF;
             text-decoration: none;
@@ -150,31 +156,29 @@
 
                 document.getElementById('message').value = '';
 
-                // AIの応答を取得
+                // サーバーにリクエストを送信
                 try {
                     const response = await fetch('/chat/', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/x-www-form-urlencoded',
                         },
-                        body: new URLSearchParams({
-                            message: userMessage
-                        })
+                        body: new URLSearchParams({ message: userMessage })
                     });
 
                     const result = await response.json();
-                    const aiResponseHTML = result.response;
+                    const responses = result.response;
 
-                    // AI応答のHTMLを追加
-                    const aiMessageDiv = document.createElement('div');
-                    aiMessageDiv.classList.add('message', 'chatgpt');
-                    aiMessageDiv.innerHTML = aiResponseHTML;
-                    chatBox.appendChild(aiMessageDiv);
-
-                    // お店詳細ページへのリンクを含む場合、HTMLにリンクを表示
-                    if (aiResponseHTML.includes('href')) {
-                        chatBox.scrollTop = chatBox.scrollHeight;
-                    }
+                    // サーバーからの応答を順次表示
+                    responses.forEach((responseHTML, index) => {
+                        setTimeout(() => {
+                            const aiMessageDiv = document.createElement('div');
+                            aiMessageDiv.classList.add('message', 'chatgpt');
+                            aiMessageDiv.innerHTML = responseHTML;
+                            chatBox.appendChild(aiMessageDiv);
+                            chatBox.scrollTop = chatBox.scrollHeight;
+                        }, index * 1000); // 1秒間隔で表示
+                    });
                 } catch (error) {
                     console.error('Error:', error);
                 }
