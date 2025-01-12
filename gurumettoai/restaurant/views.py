@@ -1,131 +1,84 @@
 from django.shortcuts import render
 from django.http import JsonResponse
-import openai
-import requests
-import os
-from dotenv import load_dotenv
 from django.views.decorators.csrf import csrf_exempt
+import requests
 
-from django.shortcuts import render
+# APIのベースURLとAPIキー
+OPENAI_API_BASE = "https://api.openai.iniad.org/api/v1"
+API_KEY = "IrwRn99zrmmNcOtw0Kh3_XTJFiA3JmKsI-XLO9_TLROXsZRThQTAhsEcEt9IsVgGBRoUGkwcCtSTFrkyMlT2NJQ"
 
 def home(request):
-    return render(request, 'restaurant/index.html')  # フォルダ構造を考慮したパスを指定  # 適切なテンプレートファイル名を指定
-
-# ジャンルコードの辞書
-GENRE_CODES = {
-    "ラーメン": "G013",
-    "居酒屋": "G001",
-    "カフェ・スイーツ": "G014",
-    "ダイニングバー・バル": "G002",
-    "創作料理": "G003",
-    "和食": "G004",
-    "洋食": "G005",
-    "イタリアン・フレンチ": "G006",
-    "中華": "G007",
-    "焼肉": "G008",
-    "韓国料理": "G017",
-    "アジア・エスニック料理": "G009",
-    "各国料理": "G010",
-    "カラオケ・パーティ": "G011",
-    "バー・カクテル": "G012",
-    "お好み焼き・もんじゃ": "G016",
-    "その他グルメ": "G015"
-}
-
+    """
+    トップページを表示する
+    """
+    return render(request, 'restaurant/index.html')
 
 @csrf_exempt
 def chat(request):
-    if request.method == 'POST':
-        user_message = request.POST.get('message', '').strip()
+    """
+    ユーザーのメッセージを受け取り、Chat Completion APIを使用して応答を生成
+    """
+    if request.method != 'POST':
+        return JsonResponse({'response': "無効なリクエストです。"})
 
-        # ユーザーのメッセージからジャンルを特定
-        genre_code = None
-        for genre, code in GENRE_CODES.items():
-            if genre in user_message:
-                genre_code = code
-                break
+    user_message = request.POST.get('message', '').strip()
 
-        # 座敷や個室の条件を解析
-        keyword_conditions = []
-        if "座敷" in user_message:
-            keyword_conditions.append("座敷")
-        if "個室" in user_message:
-            keyword_conditions.append("個室")
-        if "wifi" in user_message:
-            keyword_conditions.append("wifi")
-        if "コース" in user_message:
-            keyword_conditions.append("コース")
-        if "飲み放題" in user_message:
-            keyword_conditions.append("飲み放題")
-        if "食べ放題" in user_message:
-            keyword_conditions.append("食べ放題")
-        if "掘りごたつ" in user_message:
-            keyword_conditions.append("掘りごたつ")
-        if "カード" in user_message:
-            keyword_conditions.append("credit_card")
-        if "禁煙" in user_message:
-            keyword_conditions.append("禁煙")
-        if "喫煙" in user_message:
-            keyword_conditions.append("喫煙")
-        if "駐車場" in user_message:
-            keyword_conditions.append("駐車場")
-        if "深夜" in user_message:
-            keyword_conditions.append("midnight")
+    # Chat Completion APIを使用して応答を生成
+    try:
+        chatgpt_response = call_chat_completion_api(user_message)
+        return JsonResponse({'response': chatgpt_response})
+    except Exception as e:
+        return JsonResponse({'response': f"エラーが発生しました: {str(e)}"})
 
-        # キーワードパラメータを生成（カンマ区切り）
-        keyword_param = ",".join(keyword_conditions) if keyword_conditions else None
-
-        # ジャンルが特定できなかった場合
-        if not genre_code and not keyword_param:
-            return JsonResponse({'response': "該当するジャンルや条件が見つかりませんでした。例: ラーメン、居酒屋、座敷あり、個室あり"})
-
-        # 飲食店の推薦データを取得
-        recommendations = get_restaurant_recommendations(genre_code=genre_code, keyword=keyword_param)
-        if recommendations:
-            response_html = ""
-            for rec in recommendations:
-                response_html += f"""
-                <div>
-                    <h3>{rec['name']}</h3>
-                    <p>住所: {rec['address']}</p>
-                    <a href="{rec['url']}" target="_blank">詳細はこちら</a>
-                    <img src="{rec['image_url']}" alt="{rec['name']}" style="width:200px; height:auto;">
-                </div>
-                <br>
-                """
-            return JsonResponse({'response': response_html})
-        else:
-            return JsonResponse({'response': "該当する店舗が見つかりませんでした。"})
-    return JsonResponse({'response': "無効なリクエストです。"})
-
-
-# HotPepper APIでレストラン情報を取得
-def get_restaurant_recommendations(genre_code=None, keyword=None):
-    api_key = os.getenv('HOTPEPPER_API_KEY')
-    url = 'http://webservice.recruit.co.jp/hotpepper/gourmet/v1/'
-    params = {
-        'key': api_key,
-        'format': 'json',
-        'keyword': "赤羽",  # デフォルトエリア
-        'large_area': 'Z011',  # 東京エリア
-        'count': 5
+def call_chat_completion_api(user_message):
+    url = f"{OPENAI_API_BASE}/chat/completions"
+    headers = {
+        "Authorization": f"Bearer {API_KEY}",
+        "Content-Type": "application/json",
     }
-    if genre_code:
-        params['genre'] = genre_code
-    if keyword:
-        params['keyword'] = keyword
+    payload = {
+        "model": "gpt-4",
+        "messages": [
+            {"role": "system", "content": "あなたは飲食店を探すAIアシスタントです。"},
+            {"role": "user", "content": user_message}
+        ],
+        "max_tokens": 500,  # 最大トークン数を増加
+        "temperature": 0.7
+    }
 
-    response = requests.get(url, params=params)
+    response = requests.post(url, headers=headers, json=payload)
+
     if response.status_code == 200:
-        shops = response.json().get('results', {}).get('shop', [])
-        return [
-            {
-                'name': shop.get('name'),
-                'address': shop.get('address'),
-                'url': shop.get('urls', {}).get('pc'),
-                'image_url': shop.get('photo', {}).get('pc', {}).get('l')
-            }
-            for shop in shops
-        ]
-    return []
+        data = response.json()
+        return data["choices"][0]["message"]["content"].strip()
+    else:
+        raise Exception(f"APIリクエストが失敗しました: {response.status_code} {response.text}")
 
+
+def review(request, shop_id):
+    """
+    お店の詳細情報を表示する
+    """
+    # サンプルデータ（仮データとして使用、実際はAPIやデータベースから取得）
+    sample_shops = {
+        "1": {
+            "name": "ラーメン屋一番",
+            "address": "東京都渋谷区1-2-3",
+            "url": "https://example.com/shop1",
+            "image_url": "https://via.placeholder.com/800x400?text=Shop+Image+1"
+        },
+        "2": {
+            "name": "居酒屋たろう",
+            "address": "東京都新宿区4-5-6",
+            "url": "https://example.com/shop2",
+            "image_url": "https://via.placeholder.com/800x400?text=Shop+Image+2"
+        }
+    }
+
+    # お店の詳細を取得
+    shop = sample_shops.get(shop_id, None)
+    if not shop:
+        return JsonResponse({'error': 'お店が見つかりませんでした。'}, status=404)
+
+    # テンプレートにデータを渡してレンダリング
+    return render(request, 'restaurant/review.html', {'shop': shop})
