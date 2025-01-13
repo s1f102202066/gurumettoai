@@ -61,8 +61,8 @@ def chat(request):
             keyword_conditions.append("食べ放題")
         if "掘りごたつ" in user_message:
             keyword_conditions.append("掘りごたつ")
-        if "カード" in user_message:
-            keyword_conditions.append("credit_card")
+        if "カード可" in user_message:
+            keyword_conditions.append("カード可")
         if "禁煙" in user_message:
             keyword_conditions.append("禁煙")
         if "喫煙" in user_message:
