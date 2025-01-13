@@ -71,6 +71,14 @@ def chat(request):
             keyword_conditions.append("駐車場")
         if "深夜" in user_message:
             keyword_conditions.append("midnight")
+        if "赤羽" in user_message:
+            keyword_conditions.append("赤羽")
+        if "渋谷" in user_message:
+            keyword_conditions.append("渋谷")
+        if "新宿" in user_message:
+            keyword_conditions.append("新宿")
+        if "池袋" in user_message:
+            keyword_conditions.append("池袋")
 
         # キーワードパラメータを生成（カンマ区切り）
         keyword_param = ",".join(keyword_conditions) if keyword_conditions else None
@@ -88,6 +96,7 @@ def chat(request):
                 <div>
                     <h3>{rec['name']}</h3>
                     <p>住所: {rec['address']}</p>
+                    <p> {rec['catch']}</p>
                     <a href="{rec['url']}" target="_blank">詳細はこちら</a>
                     <img src="{rec['image_url']}" alt="{rec['name']}" style="width:200px; height:auto;">
                 </div>
@@ -122,6 +131,7 @@ def get_restaurant_recommendations(genre_code=None, keyword=None):
             {
                 'name': shop.get('name'),
                 'address': shop.get('address'),
+                'catch': shop.get('catch'),  # キャッチコピーを追加
                 'url': shop.get('urls', {}).get('pc'),
                 'image_url': shop.get('photo', {}).get('pc', {}).get('l')
             }

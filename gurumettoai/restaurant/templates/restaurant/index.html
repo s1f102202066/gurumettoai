@@ -134,14 +134,12 @@ button:hover {
 
     <div id="chat-container">
         <div id="chat-box">
-            <div class="message chatgpt">あなたがお探しの飲食店の条件を教えてください。</div>
-            <div class="message chatgpt">ご利用人数を教えてください。</div>
-            <div id="user-options">
-                <button class="user-option" data-value="1人">1人</button>
-                <button class="user-option" data-value="2人">2人</button>
-                <button class="user-option" data-value="3人">3人</button>
-                <button class="user-option" data-value="4人">4人</button>
-                <button class="user-option" data-value="5人以上">5人以上</button>
+            <div class="message chatgpt">どこで探しているのか教えてください。</div>
+            <div id="location-options">
+                <button class="location-option" data-value="赤羽">赤羽</button>
+                <button class="location-option" data-value="渋谷">渋谷</button>
+                <button class="location-option" data-value="新宿">新宿</button>
+                <button class="location-option" data-value="池袋">池袋</button>
             </div>
         </div>
         <form id="chat-form" method="post">
@@ -155,139 +153,165 @@ button:hover {
         document.addEventListener('DOMContentLoaded', function () {
             const chatForm = document.getElementById('chat-form');
             const chatBox = document.getElementById('chat-box');
-            const userOptions = document.getElementById('user-options');
+            const locationOptions = document.getElementById('location-options');
 
             let step = 1;
             const userSelections = {};
 
-            userOptions.addEventListener('click', function (e) {
-                if (e.target.classList.contains('user-option')) {
-                    const selectedValue = e.target.getAttribute('data-value');
+            locationOptions.addEventListener('click', function (e) {
+                if (e.target.classList.contains('location-option')) {
+                    const selectedLocation = e.target.getAttribute('data-value');
 
-                    const userMessageDiv = document.createElement('div');
-                    userMessageDiv.classList.add('message', 'user');
-                    userMessageDiv.textContent = selectedValue;
-                    chatBox.appendChild(userMessageDiv);
+                    const locationMessageDiv = document.createElement('div');
+                    locationMessageDiv.classList.add('message', 'user');
+                    locationMessageDiv.textContent = selectedLocation;
+                    chatBox.appendChild(locationMessageDiv);
 
-                    userSelections['人数'] = selectedValue;
+                    userSelections['場所'] = selectedLocation;
 
-                    if (step === 1) {
-                        const budgetQuestion = document.createElement('div');
-                        budgetQuestion.classList.add('message', 'chatgpt');
-                        budgetQuestion.textContent = "1人当たりの予算はどれくらいですか？";
-                        chatBox.appendChild(budgetQuestion);
+                    const userCountQuestion = document.createElement('div');
+                    userCountQuestion.classList.add('message', 'chatgpt');
+                    userCountQuestion.textContent = "ご利用人数を教えてください。";
+                    chatBox.appendChild(userCountQuestion);
 
-                        const budgetOptions = document.createElement('div');
-                        budgetOptions.id = 'budget-options';
-                        budgetOptions.innerHTML = `
-                            <button class="budget-option" data-value="2001~3000円">2001~3000円</button>
-                            <button class="budget-option" data-value="3001~4000円">3001~4000円</button>
-                            <button class="budget-option" data-value="4000円以上">4000円以上</button>
-                        `;
-                        chatBox.appendChild(budgetOptions);
+                    const userOptions = document.createElement('div');
+                    userOptions.id = 'user-options';
+                    userOptions.innerHTML = `
+                        <button class="user-option" data-value="1人">1人</button>
+                        <button class="user-option" data-value="2人">2人</button>
+                        <button class="user-option" data-value="3人">3人</button>
+                        <button class="user-option" data-value="4人">4人</button>
+                        <button class="user-option" data-value="5人以上">5人以上</button>
+                    `;
+                    chatBox.appendChild(userOptions);
 
-                        chatBox.scrollTop = chatBox.scrollHeight;
+                    chatBox.scrollTop = chatBox.scrollHeight;
 
-                        step++;
+                    userOptions.addEventListener('click', function (e) {
+                        if (e.target.classList.contains('user-option')) {
+                            const selectedValue = e.target.getAttribute('data-value');
 
-                        budgetOptions.addEventListener('click', function (e) {
-                            if (e.target.classList.contains('budget-option')) {
-                                const budgetValue = e.target.getAttribute('data-value');
+                            const userMessageDiv = document.createElement('div');
+                            userMessageDiv.classList.add('message', 'user');
+                            userMessageDiv.textContent = selectedValue;
+                            chatBox.appendChild(userMessageDiv);
 
-                                const budgetMessageDiv = document.createElement('div');
-                                budgetMessageDiv.classList.add('message', 'user');
-                                budgetMessageDiv.textContent = budgetValue;
-                                chatBox.appendChild(budgetMessageDiv);
+                            userSelections['人数'] = selectedValue;
 
-                                userSelections['予算'] = budgetValue;
+                            const budgetQuestion = document.createElement('div');
+                            budgetQuestion.classList.add('message', 'chatgpt');
+                            budgetQuestion.textContent = "1人当たりの予算はどれくらいですか？";
+                            chatBox.appendChild(budgetQuestion);
 
-                                const timeQuestion = document.createElement('div');
-                                timeQuestion.classList.add('message', 'chatgpt');
-                                timeQuestion.textContent = "何時まで利用する予定ですか？";
-                                chatBox.appendChild(timeQuestion);
+                            const budgetOptions = document.createElement('div');
+                            budgetOptions.id = 'budget-options';
+                            budgetOptions.innerHTML = `
+                                <button class="budget-option" data-value="2001~3000円">2001~3000円</button>
+                                <button class="budget-option" data-value="3001~4000円">3001~4000円</button>
+                                <button class="budget-option" data-value="4000円以上">4000円以上</button>
+                            `;
+                            chatBox.appendChild(budgetOptions);
 
-                                const timeOptions = document.createElement('div');
-                                timeOptions.id = 'time-options';
-                                timeOptions.innerHTML = `
-                                    <button class="time-option" data-value="23時まで">23時まで</button>
-                                    <button class="time-option" data-value="23時以降も利用したい">23時以降も利用したい</button>
-                                `;
-                                chatBox.appendChild(timeOptions);
+                            chatBox.scrollTop = chatBox.scrollHeight;
 
-                                chatBox.scrollTop = chatBox.scrollHeight;
+                            budgetOptions.addEventListener('click', function (e) {
+                                if (e.target.classList.contains('budget-option')) {
+                                    const budgetValue = e.target.getAttribute('data-value');
 
-                                timeOptions.addEventListener('click', function (e) {
-                                    if (e.target.classList.contains('time-option')) {
-                                        const timeValue = e.target.getAttribute('data-value');
+                                    const budgetMessageDiv = document.createElement('div');
+                                    budgetMessageDiv.classList.add('message', 'user');
+                                    budgetMessageDiv.textContent = budgetValue;
+                                    chatBox.appendChild(budgetMessageDiv);
 
-                                        const timeMessageDiv = document.createElement('div');
-                                        timeMessageDiv.classList.add('message', 'user');
-                                        timeMessageDiv.textContent = timeValue;
-                                        chatBox.appendChild(timeMessageDiv);
+                                    userSelections['予算'] = budgetValue;
 
-                                        userSelections['利用時間'] = timeValue;
+                                    const timeQuestion = document.createElement('div');
+                                    timeQuestion.classList.add('message', 'chatgpt');
+                                    timeQuestion.textContent = "何時まで利用する予定ですか？";
+                                    chatBox.appendChild(timeQuestion);
 
-                                        const optionQuestion = document.createElement('div');
-                                        optionQuestion.classList.add('message', 'chatgpt');
-                                        optionQuestion.textContent = "その他オプションはありますか？";
-                                        chatBox.appendChild(optionQuestion);
+                                    const timeOptions = document.createElement('div');
+                                    timeOptions.id = 'time-options';
+                                    timeOptions.innerHTML = `
+                                        <button class="time-option" data-value="23時まで">23時まで</button>
+                                        <button class="time-option" data-value="23時以降も利用したい">23時以降も利用したい</button>
+                                    `;
+                                    chatBox.appendChild(timeOptions);
 
-                                        const optionChoices = document.createElement('div');
-                                        optionChoices.id = 'option-choices';
-                                        optionChoices.innerHTML = `
-                                            <label><input type="checkbox" class="option-checkbox" value="禁煙">禁煙</label>
-                                            <label><input type="checkbox" class="option-checkbox" value="カード可">カード可</label>
-                                            <label><input type="checkbox" class="option-checkbox" value="食べ放題">食べ放題</label>
-                                            <label><input type="checkbox" class="option-checkbox" value="飲み放題">飲み放題</label>
-                                            <label><input type="checkbox" class="option-checkbox" value="個室">個室</label>
-                                            <button id="submit-options">決定</button>
-                                        `;
-                                        chatBox.appendChild(optionChoices);
+                                    chatBox.scrollTop = chatBox.scrollHeight;
 
-                                        chatBox.scrollTop = chatBox.scrollHeight;
+                                    timeOptions.addEventListener('click', function (e) {
+                                        if (e.target.classList.contains('time-option')) {
+                                            const timeValue = e.target.getAttribute('data-value');
 
-                                        document.getElementById('submit-options').addEventListener('click', function () {
-                                            const selectedOptions = [];
-                                            document.querySelectorAll('.option-checkbox:checked').forEach(function (checkbox) {
-                                                selectedOptions.push(checkbox.value);
+                                            const timeMessageDiv = document.createElement('div');
+                                            timeMessageDiv.classList.add('message', 'user');
+                                            timeMessageDiv.textContent = timeValue;
+                                            chatBox.appendChild(timeMessageDiv);
+
+                                            userSelections['利用時間'] = timeValue;
+
+                                            const optionQuestion = document.createElement('div');
+                                            optionQuestion.classList.add('message', 'chatgpt');
+                                            optionQuestion.textContent = "その他オプションはありますか？";
+                                            chatBox.appendChild(optionQuestion);
+
+                                            const optionChoices = document.createElement('div');
+                                            optionChoices.id = 'option-choices';
+                                            optionChoices.innerHTML = `
+                                                <label><input type="checkbox" class="option-checkbox" value="禁煙">禁煙</label>
+                                                <label><input type="checkbox" class="option-checkbox" value="カード払い可">カード払い可</label>
+                                                <label><input type="checkbox" class="option-checkbox" value="食べ放題">食べ放題</label>
+                                                <label><input type="checkbox" class="option-checkbox" value="飲み放題">飲み放題</label>
+                                                <label><input type="checkbox" class="option-checkbox" value="個室">個室</label>
+                                                <button id="submit-options">決定</button>
+                                            `;
+                                            chatBox.appendChild(optionChoices);
+
+                                            chatBox.scrollTop = chatBox.scrollHeight;
+
+                                            document.getElementById('submit-options').addEventListener('click', function () {
+                                                const selectedOptions = [];
+                                                document.querySelectorAll('.option-checkbox:checked').forEach(function (checkbox) {
+                                                    selectedOptions.push(checkbox.value);
+                                                });
+
+                                                const optionsMessageDiv = document.createElement('div');
+                                                optionsMessageDiv.classList.add('message', 'user');
+                                                optionsMessageDiv.textContent = `選択されたオプション: ${selectedOptions.join(', ')}`;
+                                                chatBox.appendChild(optionsMessageDiv);
+
+                                                userSelections['オプション'] = selectedOptions;
+
+                                                fetch('/chat/', {
+                                                    method: 'POST',
+                                                    headers: {
+                                                        'Content-Type': 'application/x-www-form-urlencoded',
+                                                    },
+                                                    body: new URLSearchParams({
+                                                        message: JSON.stringify(userSelections)
+                                                    })
+                                                })
+                                                    .then(response => response.json())
+                                                    .then(result => {
+                                                        const aiMessage = result.response;
+
+                                                        const aiMessageDiv = document.createElement('div');
+                                                        aiMessageDiv.classList.add('message', 'chatgpt');
+                                                        aiMessageDiv.innerHTML = aiMessage;
+                                                        chatBox.appendChild(aiMessageDiv);
+
+                                                        chatBox.scrollTop = chatBox.scrollHeight;
+                                                    })
+                                                    .catch(error => console.error('Error:', error));
                                             });
-
-                                            const optionsMessageDiv = document.createElement('div');
-                                            optionsMessageDiv.classList.add('message', 'user');
-                                            optionsMessageDiv.textContent = `選択されたオプション: ${selectedOptions.join(', ')}`;
-                                            chatBox.appendChild(optionsMessageDiv);
-
-                                            userSelections['オプション'] = selectedOptions;
-
-                                            fetch('/chat/', {
-                                                method: 'POST',
-                                                headers: {
-                                                    'Content-Type': 'application/x-www-form-urlencoded',
-                                                },
-                                                body: new URLSearchParams({
-                                                    message: JSON.stringify(userSelections)
-                                                })
-                                            })
-                                                .then(response => response.json())
-                                                .then(result => {
-                                                    const aiMessage = result.response;
-
-                                                    const aiMessageDiv = document.createElement('div');
-                                                    aiMessageDiv.classList.add('message', 'chatgpt');
-                                                    aiMessageDiv.innerHTML = aiMessage;
-                                                    chatBox.appendChild(aiMessageDiv);
-
-                                                    chatBox.scrollTop = chatBox.scrollHeight;
-                                                })
-                                                .catch(error => console.error('Error:', error));
-                                        });
-                                    }
-                                });
-                            }
-                        });
-                    }
-                }
-            })
+                                        }
+                                    });
+                                }
+                            });
+                        }
+                    });
+                }})
             });
 
             chatForm.addEventListener('submit', async function (e) {
