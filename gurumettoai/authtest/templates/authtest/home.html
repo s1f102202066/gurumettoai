@@ -15,39 +15,31 @@
             margin: 0;
         }
 
-        #login-container {
+        #home-container {
             width: 100%;
             max-width: 400px;
             padding: 20px;
             border-radius: 15px;
             background-color: #fff;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            display: flex;
-            flex-direction: column;
             text-align: center;
         }
 
         h1 {
             font-size: 24px;
             margin-bottom: 20px;
-            color: #333;
         }
 
         p {
             font-size: 14px;
             margin: 10px 0;
-            color: #666;
         }
 
         form {
-            margin-top: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            margin-bottom: 10px;
         }
 
-        button {
-            margin-top: 10px;
+        form button {
             padding: 10px 20px;
             background-color: #5b86e5;
             color: white;
@@ -58,33 +50,41 @@
             width: 100%;
         }
 
-        button:hover {
+        form button:hover {
             background-color: #3d73d2;
         }
 
-        a {
-            color: #5b86e5;
-            text-decoration: none;
-            font-size: 14px;
+        .button-container {
             margin-top: 10px;
-            display: inline-block;
         }
 
-        a:hover {
-            text-decoration: underline;
+        .button-container a {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #5b86e5;
+            color: white;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .button-container a:hover {
+            background-color: #3d73d2;
         }
     </style>
 </head>
 <body>
-    <div id="login-container">
+    <div id="home-container">
         <h1>Welcome</h1>
-
         {% if user.is_authenticated %}
         <p>Hi {{ user.username }}!</p>
         <form method="post" action="{% url 'logout' %}">
             {% csrf_token %}
             <button type="submit">Logout</button>
         </form>
+        <div class="button-container">
+            <a href="{% url 'mypage' %}">マイページへ</a>
+        </div>
         {% else %}
         <p>You are not logged in.</p>
         <form method="get" action="{% url 'login' %}">
