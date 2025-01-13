@@ -129,3 +129,11 @@ def get_restaurant_recommendations(genre_code=None, keyword=None):
         ]
     return []
 
+def restaurant_detail(request, restaurant_id):
+    # 仮のデータ（実際にはデータベースやAPIから取得）
+    restaurant = {
+        "name": "サンプルレストラン",
+        "address": "東京都千代田区丸の内1-1-1",
+        "budget": "3000円",
+    }
+    return render(request, 'restaurant/page.html', {"restaurant": restaurant})
