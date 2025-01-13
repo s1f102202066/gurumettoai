@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+
+        .restaurant-list {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .restaurant-item {
+            background-color: #fff;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .restaurant-item h2 {
+            margin: 0 0 10px 0;
+            color: #5b86e5;
+        }
+
+        .restaurant-item p {
+            margin: 5px 0;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <h1>My Page</h1>
+
+    <div class="restaurant-list">
+        {% for restaurant in liked_restaurants %}
+        <div class="restaurant-item">
+            <h2>{{ restaurant.restaurant_name }}</h2>
+            <p>住所: {{ restaurant.restaurant_address }}</p>
+            <p>いいね日時: {{ restaurant.liked_at|date:"Y年m月d日 H:i" }}</p>
+        </div>
+        {% empty %}
+        <p>まだいいねしたお店がありません。</p>
+        {% endfor %}
+    </div>
+</body>
+</html>
