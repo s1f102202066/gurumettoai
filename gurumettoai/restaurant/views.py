@@ -109,6 +109,9 @@ def chat(request):
 
 
 # HotPepper APIでレストラン情報を取得
+import random  # ランダム要素を追加するためにインポート
+
+# HotPepper APIでレストラン情報を取得
 def get_restaurant_recommendations(genre_code=None, keyword=None):
     api_key = os.getenv('HOTPEPPER_API_KEY')
     url = 'http://webservice.recruit.co.jp/hotpepper/gourmet/v1/'
@@ -117,7 +120,7 @@ def get_restaurant_recommendations(genre_code=None, keyword=None):
         'format': 'json',
         'keyword': "赤羽",  # デフォルトエリア
         'large_area': 'Z011',  # 東京エリア
-        'count': 5
+        'count': 50  #APIの最大値である50件
     }
     if genre_code:
         params['genre'] = genre_code
@@ -127,6 +130,11 @@ def get_restaurant_recommendations(genre_code=None, keyword=None):
     response = requests.get(url, params=params)
     if response.status_code == 200:
         shops = response.json().get('results', {}).get('shop', [])
+        
+        # 50件からランダムで5個抽出
+        if len(shops) > 5:
+            shops = random.sample(shops, 5)
+
         return [
             {
                 'name': shop.get('name'),
@@ -138,4 +146,3 @@ def get_restaurant_recommendations(genre_code=None, keyword=None):
             for shop in shops
         ]
     return []
-

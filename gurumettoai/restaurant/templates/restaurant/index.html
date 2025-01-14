@@ -152,168 +152,204 @@ button:hover {
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const chatForm = document.getElementById('chat-form');
-            const chatBox = document.getElementById('chat-box');
-            const locationOptions = document.getElementById('location-options');
+    const chatForm = document.getElementById('chat-form');
+    const chatBox = document.getElementById('chat-box');
+    const locationOptions = document.getElementById('location-options');
+    const messageInput = document.getElementById('message');
 
-            let step = 1;
-            const userSelections = {};
+    const userSelections = {};
 
-            locationOptions.addEventListener('click', function (e) {
-                if (e.target.classList.contains('location-option')) {
-                    const selectedLocation = e.target.getAttribute('data-value');
+    // 既存の場所ボタンをクリックした場合の処理
+    locationOptions.addEventListener('click', function (e) {
+        if (e.target.classList.contains('location-option')) {
+            const selectedLocation = e.target.getAttribute('data-value');
+            processLocation(selectedLocation);
+        }
+    });
 
-                    const locationMessageDiv = document.createElement('div');
-                    locationMessageDiv.classList.add('message', 'user');
-                    locationMessageDiv.textContent = selectedLocation;
-                    chatBox.appendChild(locationMessageDiv);
+    // テキスト入力から場所を送信した場合の処理
+    chatForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        const userMessage = messageInput.value.trim();
+        if (!userMessage) return;
 
-                    userSelections['場所'] = selectedLocation;
+        processLocation(userMessage);
+        messageInput.value = ''; // 入力欄をクリア
+    });
 
-                    const userCountQuestion = document.createElement('div');
-                    userCountQuestion.classList.add('message', 'chatgpt');
-                    userCountQuestion.textContent = "何人で利用されますか？";
-                    chatBox.appendChild(userCountQuestion);
+    // 場所を処理する共通関数
+    function processLocation(location) {
+        const locationMessageDiv = document.createElement('div');
+        locationMessageDiv.classList.add('message', 'user');
+        locationMessageDiv.textContent = location;
+        chatBox.appendChild(locationMessageDiv);
 
-                    const userOptions = document.createElement('div');
-                    userOptions.id = 'user-options';
-                    userOptions.innerHTML = `
-                        <button class="user-option" data-value="1人">1人</button>
-                        <button class="user-option" data-value="2人">2人</button>
-                        <button class="user-option" data-value="3人">3人</button>
-                        <button class="user-option" data-value="4人">4人</button>
-                        <button class="user-option" data-value="5人以上">5人以上</button>
-                    `;
-                    chatBox.appendChild(userOptions);
+        userSelections['場所'] = location;
 
-                    chatBox.scrollTop = chatBox.scrollHeight;
+        askUserCount();
+    }
 
-                    userOptions.addEventListener('click', function (e) {
-                        if (e.target.classList.contains('user-option')) {
-                            const selectedValue = e.target.getAttribute('data-value');
+    function askUserCount() {
+        const userCountQuestion = document.createElement('div');
+        userCountQuestion.classList.add('message', 'chatgpt');
+        userCountQuestion.textContent = "何人で利用されますか？";
+        chatBox.appendChild(userCountQuestion);
 
-                            const userMessageDiv = document.createElement('div');
-                            userMessageDiv.classList.add('message', 'user');
-                            userMessageDiv.textContent = selectedValue;
-                            chatBox.appendChild(userMessageDiv);
+        const userOptions = document.createElement('div');
+        userOptions.id = 'user-options';
+        userOptions.innerHTML = `
+            <button class="user-option" data-value="1人">1人</button>
+            <button class="user-option" data-value="2人">2人</button>
+            <button class="user-option" data-value="3人">3人</button>
+            <button class="user-option" data-value="4人">4人</button>
+            <button class="user-option" data-value="5人以上">5人以上</button>
+        `;
+        chatBox.appendChild(userOptions);
 
-                            userSelections['人数'] = selectedValue;
+        chatBox.scrollTop = chatBox.scrollHeight;
 
-                            const budgetQuestion = document.createElement('div');
-                            budgetQuestion.classList.add('message', 'chatgpt');
-                            budgetQuestion.textContent = "1人当たりの予算はどれくらいですか？";
-                            chatBox.appendChild(budgetQuestion);
+        userOptions.addEventListener('click', function (e) {
+            if (e.target.classList.contains('user-option')) {
+                const selectedValue = e.target.getAttribute('data-value');
 
-                            const budgetOptions = document.createElement('div');
-                            budgetOptions.id = 'budget-options';
-                            budgetOptions.innerHTML = `
-                                <button class="budget-option" data-value="2001~3000円">2001~3000円</button>
-                                <button class="budget-option" data-value="3001~4000円">3001~4000円</button>
-                                <button class="budget-option" data-value="4000円以上">4000円以上</button>
-                            `;
-                            chatBox.appendChild(budgetOptions);
+                const userMessageDiv = document.createElement('div');
+                userMessageDiv.classList.add('message', 'user');
+                userMessageDiv.textContent = selectedValue;
+                chatBox.appendChild(userMessageDiv);
 
-                            chatBox.scrollTop = chatBox.scrollHeight;
+                userSelections['人数'] = selectedValue;
 
-                            budgetOptions.addEventListener('click', function (e) {
-                                if (e.target.classList.contains('budget-option')) {
-                                    const budgetValue = e.target.getAttribute('data-value');
+                askBudget();
+            }
+        });
+    }
 
-                                    const budgetMessageDiv = document.createElement('div');
-                                    budgetMessageDiv.classList.add('message', 'user');
-                                    budgetMessageDiv.textContent = budgetValue;
-                                    chatBox.appendChild(budgetMessageDiv);
+    function askBudget() {
+        const budgetQuestion = document.createElement('div');
+        budgetQuestion.classList.add('message', 'chatgpt');
+        budgetQuestion.textContent = "1人当たりの予算はどれくらいですか？";
+        chatBox.appendChild(budgetQuestion);
 
-                                    userSelections['予算'] = budgetValue;
+        const budgetOptions = document.createElement('div');
+        budgetOptions.id = 'budget-options';
+        budgetOptions.innerHTML = `
+            <button class="budget-option" data-value="2001~3000円">2001~3000円</button>
+            <button class="budget-option" data-value="3001~4000円">3001~4000円</button>
+            <button class="budget-option" data-value="4000円以上">4000円以上</button>
+        `;
+        chatBox.appendChild(budgetOptions);
 
-                                    const timeQuestion = document.createElement('div');
-                                    timeQuestion.classList.add('message', 'chatgpt');
-                                    timeQuestion.textContent = "何時まで利用する予定ですか？";
-                                    chatBox.appendChild(timeQuestion);
+        chatBox.scrollTop = chatBox.scrollHeight;
 
-                                    const timeOptions = document.createElement('div');
-                                    timeOptions.id = 'time-options';
-                                    timeOptions.innerHTML = `
-                                        <button class="time-option" data-value="23時まで">23時まで</button>
-                                        <button class="time-option" data-value="23時以降も利用したい">23時以降も利用したい</button>
-                                    `;
-                                    chatBox.appendChild(timeOptions);
+        budgetOptions.addEventListener('click', function (e) {
+            if (e.target.classList.contains('budget-option')) {
+                const budgetValue = e.target.getAttribute('data-value');
 
-                                    chatBox.scrollTop = chatBox.scrollHeight;
+                const budgetMessageDiv = document.createElement('div');
+                budgetMessageDiv.classList.add('message', 'user');
+                budgetMessageDiv.textContent = budgetValue;
+                chatBox.appendChild(budgetMessageDiv);
 
-                                    timeOptions.addEventListener('click', function (e) {
-                                        if (e.target.classList.contains('time-option')) {
-                                            const timeValue = e.target.getAttribute('data-value');
+                userSelections['予算'] = budgetValue;
 
-                                            const timeMessageDiv = document.createElement('div');
-                                            timeMessageDiv.classList.add('message', 'user');
-                                            timeMessageDiv.textContent = timeValue;
-                                            chatBox.appendChild(timeMessageDiv);
+                askTime();
+            }
+        });
+    }
 
-                                            userSelections['利用時間'] = timeValue;
+    function askTime() {
+        const timeQuestion = document.createElement('div');
+        timeQuestion.classList.add('message', 'chatgpt');
+        timeQuestion.textContent = "何時まで利用する予定ですか？";
+        chatBox.appendChild(timeQuestion);
 
-                                            const optionQuestion = document.createElement('div');
-                                            optionQuestion.classList.add('message', 'chatgpt');
-                                            optionQuestion.textContent = "その他オプションはありますか？";
-                                            chatBox.appendChild(optionQuestion);
+        const timeOptions = document.createElement('div');
+        timeOptions.id = 'time-options';
+        timeOptions.innerHTML = `
+            <button class="time-option" data-value="23時まで">23時まで</button>
+            <button class="time-option" data-value="23時以降も利用したい">23時以降も利用したい</button>
+        `;
+        chatBox.appendChild(timeOptions);
 
-                                            const optionChoices = document.createElement('div');
-                                            optionChoices.id = 'option-choices';
-                                            optionChoices.innerHTML = `
-                                                <label><input type="checkbox" class="option-checkbox" value="禁煙">禁煙</label>
-                                                <label><input type="checkbox" class="option-checkbox" value="カード払い可">カード払い可</label>
-                                                <label><input type="checkbox" class="option-checkbox" value="食べ放題">食べ放題</label>
-                                                <label><input type="checkbox" class="option-checkbox" value="飲み放題">飲み放題</label>
-                                                <label><input type="checkbox" class="option-checkbox" value="個室">個室</label>
-                                                <button id="submit-options">決定</button>
-                                            `;
-                                            chatBox.appendChild(optionChoices);
+        chatBox.scrollTop = chatBox.scrollHeight;
 
-                                            chatBox.scrollTop = chatBox.scrollHeight;
+        timeOptions.addEventListener('click', function (e) {
+            if (e.target.classList.contains('time-option')) {
+                const timeValue = e.target.getAttribute('data-value');
 
-                                            document.getElementById('submit-options').addEventListener('click', function () {
-                                                const selectedOptions = [];
-                                                document.querySelectorAll('.option-checkbox:checked').forEach(function (checkbox) {
-                                                    selectedOptions.push(checkbox.value);
-                                                });
+                const timeMessageDiv = document.createElement('div');
+                timeMessageDiv.classList.add('message', 'user');
+                timeMessageDiv.textContent = timeValue;
+                chatBox.appendChild(timeMessageDiv);
 
-                                                const optionsMessageDiv = document.createElement('div');
-                                                optionsMessageDiv.classList.add('message', 'user');
-                                                optionsMessageDiv.textContent = `選択されたオプション: ${selectedOptions.join(', ')}`;
-                                                chatBox.appendChild(optionsMessageDiv);
+                userSelections['利用時間'] = timeValue;
 
-                                                userSelections['オプション'] = selectedOptions;
+                askOptions();
+            }
+        });
+    }
 
-                                                fetch('/chat/', {
-                                                    method: 'POST',
-                                                    headers: {
-                                                        'Content-Type': 'application/x-www-form-urlencoded',
-                                                    },
-                                                    body: new URLSearchParams({
-                                                        message: JSON.stringify(userSelections)
-                                                    })
-                                                })
-                                                    .then(response => response.json())
-                                                    .then(result => {
-                                                        const aiMessage = result.response;
+    function askOptions() {
+        const optionQuestion = document.createElement('div');
+        optionQuestion.classList.add('message', 'chatgpt');
+        optionQuestion.textContent = "その他オプションはありますか？";
+        chatBox.appendChild(optionQuestion);
 
-                                                        const aiMessageDiv = document.createElement('div');
-                                                        aiMessageDiv.classList.add('message', 'chatgpt');
-                                                        aiMessageDiv.innerHTML = aiMessage;
-                                                        chatBox.appendChild(aiMessageDiv);
+        const optionChoices = document.createElement('div');
+        optionChoices.id = 'option-choices';
+        optionChoices.innerHTML = `
+            <label><input type="checkbox" class="option-checkbox" value="禁煙">禁煙</label>
+            <label><input type="checkbox" class="option-checkbox" value="カード払い可">カード払い可</label>
+            <label><input type="checkbox" class="option-checkbox" value="食べ放題">食べ放題</label>
+            <label><input type="checkbox" class="option-checkbox" value="飲み放題">飲み放題</label>
+            <label><input type="checkbox" class="option-checkbox" value="個室">個室</label>
+            <button id="submit-options">決定</button>
+        `;
+        chatBox.appendChild(optionChoices);
 
-                                                        chatBox.scrollTop = chatBox.scrollHeight;
-                                                    })
-                                                    .catch(error => console.error('Error:', error));
-                                            });
-                                        }
-                                    });
-                                }
-                            });
-                        }
-                    });
-                }})
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+        document.getElementById('submit-options').addEventListener('click', function () {
+            const selectedOptions = [];
+            document.querySelectorAll('.option-checkbox:checked').forEach(function (checkbox) {
+                selectedOptions.push(checkbox.value);
             });
+
+            const optionsMessageDiv = document.createElement('div');
+            optionsMessageDiv.classList.add('message', 'user');
+            optionsMessageDiv.textContent = `選択されたオプション: ${selectedOptions.join(', ')}`;
+            chatBox.appendChild(optionsMessageDiv);
+
+            userSelections['オプション'] = selectedOptions;
+
+            submitToBackend();
+        });
+    }
+
+    function submitToBackend() {
+        fetch('/chat/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                message: JSON.stringify(userSelections)
+            })
+        })
+            .then(response => response.json())
+            .then(result => {
+                const aiMessage = result.response;
+
+                const aiMessageDiv = document.createElement('div');
+                aiMessageDiv.classList.add('message', 'chatgpt');
+                aiMessageDiv.innerHTML = aiMessage;
+                chatBox.appendChild(aiMessageDiv);
+
+                chatBox.scrollTop = chatBox.scrollHeight;
+            })
+            .catch(error => console.error('Error:', error));
+    }
+});
 
             chatForm.addEventListener('submit', async function (e) {
                 e.preventDefault();
