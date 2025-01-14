@@ -99,6 +99,7 @@ def chat(request):
                     <p> {rec['catch']}</p>
                     <a href="{rec['url']}" target="_blank">詳細はこちら</a>
                     <img src="{rec['image_url']}" alt="{rec['name']}" style="width:200px; height:auto;">
+                    <button class="like-button">いいね！</button>
                 </div>
                 <br>
                 """
@@ -142,6 +143,7 @@ def get_restaurant_recommendations(genre_code=None, keyword=None):
                 'catch': shop.get('catch'),  # キャッチコピーを追加
                 'url': shop.get('urls', {}).get('pc'),
                 'image_url': shop.get('photo', {}).get('pc', {}).get('l')
+                
             }
             for shop in shops
         ]
